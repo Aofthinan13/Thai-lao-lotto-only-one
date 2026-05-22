@@ -34,7 +34,6 @@
     .loading {
       animation: pulse 1s infinite;
     }
-    /* เพิ่มเอฟเฟกต์ตอนปุ่มถูก Disable */
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -84,33 +83,33 @@
 
       <div class="mt-8">
         <h2 class="font-bold mb-3 text-slate-300">📊 สถิติย้อนหลัง (ฐานข้อมูล)</h2>
-        <div id="historyContainer" class="space-y-2 text-sm"></div>
+        <div id="historyContainer" class="space-y-3 text-sm"></div>
       </div>
     </div>
   </div>
 
 <script>
 let currentMode = 'thai';
-let isGenerating = false; // ป้องกันการกดปุ่มซ้ำ
+let isGenerating = false;
 
-// เพิ่มข้อมูลสถิติให้เยอะขึ้นเล็กน้อยเพื่อให้การคำนวณมีน้ำหนัก
+// [อัปเดต]: เพิ่มข้อมูลวันที่ (date) เข้าไปในแต่ละงวด
 const historyData = {
   thai: [
-    { main: '985452', bottom: '95' },
-    { main: '284729', bottom: '38' },
-    { main: '543118', bottom: '21' },
-    { main: '074205', bottom: '64' },
-    { main: '998887', bottom: '09' },
-    { main: '125272', bottom: '09' },
-    { main: '361807', bottom: '92' }
+    { date: '16 พ.ค. 69', main: '985452', bottom: '95' },
+    { date: '2 พ.ค. 69', main: '284729', bottom: '38' },
+    { date: '16 เม.ย. 69', main: '543118', bottom: '21' },
+    { date: '1 เม.ย. 69', main: '074205', bottom: '64' },
+    { date: '16 มี.ค. 69', main: '998887', bottom: '09' },
+    { date: '1 มี.ค. 69', main: '125272', bottom: '09' },
+    { date: '16 ก.พ. 69', main: '361807', bottom: '92' }
   ],
   lao: [
-    { main: '8769', bottom: '87' },
-    { main: '9572', bottom: '95' },
-    { main: '3417', bottom: '34' },
-    { main: '7804', bottom: '78' },
-    { main: '1932', bottom: '12' },
-    { main: '4451', bottom: '44' }
+    { date: '20 พ.ค. 69', main: '8769', bottom: '87' },
+    { date: '18 พ.ค. 69', main: '9572', bottom: '95' },
+    { date: '15 พ.ค. 69', main: '3417', bottom: '34' },
+    { date: '13 พ.ค. 69', main: '7804', bottom: '78' },
+    { date: '11 พ.ค. 69', main: '1932', bottom: '12' },
+    { date: '8 พ.ค. 69', main: '4451', bottom: '44' }
   ]
 };
 
@@ -124,35 +123,45 @@ const bottomContainer = document.getElementById('bottomContainer');
 const historyContainer = document.getElementById('historyContainer');
 const thaiBottomSection = document.getElementById('thaiBottomSection');
 
+// [อัปเดต]: ปรับปรุงการวาด UI ให้แสดงวันที่พร้อมเส้นคั่น
 function renderHistory() {
   historyContainer.innerHTML = '';
   historyData[currentMode].forEach(item => {
     const top3 = item.main.slice(-3);
     const div = document.createElement('div');
-    div.className = 'glass rounded-xl p-3 flex justify-between items-center';
     
-    // จัดรูปแบบการแสดงผลให้ดูง่ายขึ้น
+    // เปลี่ยน layout เป็น column เพื่อให้วางวันที่ไว้ด้านบนได้
+    div.className = 'glass rounded-xl p-3 flex flex-col gap-2';
+    
     if(currentMode === 'thai') {
         div.innerHTML = `
-          <div class="text-emerald-300 font-mono tracking-widest">${item.main}</div>
-          <div class="text-gray-400">ล่าง: <span class="text-yellow-400 font-bold">${item.bottom}</span></div>
+          <div class="flex justify-between items-center border-b border-white/10 pb-2 mb-1">
+            <span class="text-xs text-emerald-300 font-semibold bg-emerald-900/40 px-2 py-1 rounded">🗓️ งวดวันที่ ${item.date}</span>
+          </div>
+          <div class="flex justify-between items-center px-1">
+            <div class="text-white font-mono tracking-widest text-base">${item.main}</div>
+            <div class="text-gray-400">ล่าง: <span class="text-yellow-400 font-bold text-base">${item.bottom}</span></div>
+          </div>
         `;
     } else {
         div.innerHTML = `
-          <div class="text-red-300 font-mono tracking-widest">${item.main}</div>
-          <div class="text-gray-400">3ตัว: <span class="text-white font-bold">${top3}</span></div>
+          <div class="flex justify-between items-center border-b border-white/10 pb-2 mb-1">
+            <span class="text-xs text-red-300 font-semibold bg-red-900/40 px-2 py-1 rounded">🗓️ งวดวันที่ ${item.date}</span>
+          </div>
+          <div class="flex justify-between items-center px-1">
+            <div class="text-white font-mono tracking-widest text-base">${item.main}</div>
+            <div class="text-gray-400">3ตัว: <span class="text-white font-bold text-base">${top3}</span></div>
+          </div>
         `;
     }
     historyContainer.appendChild(div);
   });
 }
 
-// [อัปเกรด]: คำนวณความถี่ "แยกตามตำแหน่ง (Index)" แทนการเหมารวม
 function getPositionalFrequency(type, length) {
-  // สร้าง Array เปล่าๆ ตามจำนวนหลัก (เช่น 6 หลัก ก็จะมี 6 ก้อนสถิติ)
   const frequencies = Array.from({ length }, () => {
     const freq = {};
-    for (let i = 0; i <= 9; i++) freq[i] = 1; // Base score = 1
+    for (let i = 0; i <= 9; i++) freq[i] = 1;
     return freq;
   });
 
@@ -162,12 +171,11 @@ function getPositionalFrequency(type, length) {
       for (let i = 0; i < length; i++) {
         const digit = parseInt(targetStr[i]);
         if (!isNaN(digit)) {
-          frequencies[i][digit] += 3; // ให้คะแนนตัวเลขที่เคยออกในตำแหน่งนี้ +3
+          frequencies[i][digit] += 3;
         }
       }
     }
   });
-
   return frequencies;
 }
 
@@ -178,17 +186,15 @@ function weightedRandom(freq) {
       pool.push(Number(digit));
     }
   });
-  
   const random = crypto.getRandomValues(new Uint32Array(1))[0];
   return pool[random % pool.length];
 }
 
-// [อัปเกรด]: สร้างตัวเลขโดยอ้างอิงสถิติของแต่ละหลัก
 function generatePositionalNumber(type, length) {
   const posFreqs = getPositionalFrequency(type, length);
   let result = '';
   for (let i = 0; i < length; i++) {
-    result += weightedRandom(posFreqs[i]); // สุ่มแยกทีละหลักจากฐานข้อมูลของหลักนั้น
+    result += weightedRandom(posFreqs[i]);
   }
   return result;
 }
@@ -204,7 +210,7 @@ function renderBalls(container, number, color) {
 }
 
 function generatePrediction() {
-  if (isGenerating) return; // [อัปเกรด]: ป้องกันการกดซ้ำ
+  if (isGenerating) return;
   
   isGenerating = true;
   generateBtn.disabled = true;
@@ -242,7 +248,6 @@ function generatePrediction() {
       renderBalls(twoContainer, lotto2, mainColor);
     }
 
-    // คืนค่าปุ่มให้กลับมากดได้อีกครั้ง
     isGenerating = false;
     generateBtn.disabled = false;
     generateBtn.innerHTML = "🚀 วิเคราะห์เลขเด่น";
@@ -258,7 +263,6 @@ thaiBtn.onclick = () => {
   thaiBottomSection.style.display = 'block';
   renderHistory();
   
-  // Clear balls
   mainContainer.innerHTML = ''; threeContainer.innerHTML = ''; 
   twoContainer.innerHTML = ''; bottomContainer.innerHTML = '';
 };
@@ -271,13 +275,8 @@ laoBtn.onclick = () => {
   thaiBottomSection.style.display = 'none';
   renderHistory();
 
-  // Clear balls
   mainContainer.innerHTML = ''; threeContainer.innerHTML = ''; 
   twoContainer.innerHTML = ''; bottomContainer.innerHTML = '';
-};
-
-generateBtn.onclick = () => {
-  generatePrediction();
 };
 
 // Initialize
