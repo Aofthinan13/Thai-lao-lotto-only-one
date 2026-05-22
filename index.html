@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siam & Lao Lotto Multi-Predictor</title>
+    <title>Siam & Lao Lotto Multi-Predictor (Auto Sync)</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#111827">
@@ -44,7 +44,7 @@
             <div id="number-container" class="flex justify-center flex-wrap gap-2 my-5">
                 </div>
 
-            <p id="predict-type" class="text-sm text-yellow-500 font-medium">โปรดเลือกกดเมนูคำนวณด้านล่าง</p>
+            <p id="predict-type" class="text-sm text-yellow-500 font-medium">⏳ กำลังเชื่อมต่อ API อัปเดตข้อมูลสด...</p>
         </div>
 
         <div id="control-lao" class="space-y-3 mb-6">
@@ -76,9 +76,14 @@
             <div class="overflow-hidden rounded-xl border border-gray-700">
                 <table class="w-full text-left border-collapse">
                     <thead id="table-head"></thead>
-                    <tbody id="table-body" class="text-sm text-gray-300 divide-y divide-gray-700"></tbody>
+                    <tbody id="table-body" class="text-sm text-gray-300 divide-y divide-gray-700">
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-gray-500">กำลังดาวน์โหลดข้อมูลจากระบบคลาวด์...</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
+            <p class="text-[11px] text-gray-500 mt-2 text-center">*ระบบเชื่อมโยง API ผลรางวัลอัตโนมัติ ทุกครั้งที่มีการเปิดใช้งานแอป</p>
         </div>
 
     </main>
@@ -90,20 +95,10 @@
     <script>
         let currentMode = 'lao';
         
-        // ฐานข้อมูลผลหวยล่าสุดเพื่อใช้แปลงสูตร (ตรงตามผลจริงงวดปัจจุบัน)
-        const historyData = {
-            lao: [
-                { date: "20 พ.ค. 26", main: "2377", top: "377", bottom: "23" },
-                { date: "18 พ.ค. 26", main: "9572", top: "572", bottom: "95" },
-                { date: "15 พ.ค. 26", main: "3417", top: "417", bottom: "34" },
-                { date: "13 พ.ค. 26", main: "7804", top: "804", bottom: "78" }
-            ],
-            thai: [
-                { date: "16 พ.ค. 26", main: "985452", top: "452", bottom: "95" },
-                { date: "2 พ.ค. 26",  main: "284729", top: "729", bottom: "38" },
-                { date: "16 เม.ย. 26", main: "543118", top: "118", bottom: "21" },
-                { date: "1 เม.ย. 26",  main: "074205", top: "205", bottom: "64" }
-            ]
+        // คลังเก็บข้อมูลที่จะได้รับแบบ Real-time มาจากอินเทอร์เน็ต
+        let historyData = {
+            lao: [],
+            thai: []
         };
 
         function getTodayString() {
@@ -111,23 +106,58 @@
             return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         }
 
-        // สูตรคำนวณคณิตศาสตร์อิงตามตำแหน่งหลักและฐานสถิติผลหวยจริง
+        // ================= [ ระบบเชื่อมต่อดึงฐานข้อมูลสดอัตโนมัติ ] =================
+        async function fetchLottoLive() {
+            try {
+                // ดึงไฟล์สถิติกลางที่คอยอัปเดตเลขงวดใหม่ผ่านเครือข่ายอินเทอร์เน็ต
+                const response = await fetch('https://raw.githubusercontent.com/aofthinan13/aofthinan13.github.io/main/lotto-api.json');
+                if (!response.ok) throw new Error('API connection failed');
+                const data = await response.json();
+                
+                historyData.lao = data.lao;
+                historyData.thai = data.thai;
+                
+                // ดึงข้อมูลสำเร็จ สั่งให้เว็บอัปเดตหน้าตารางและตรวจสอบสิทธิ์ปุ่มทันที
+                renderTable();
+                checkAllButtonsLimit();
+                
+            } catch (error) {
+                console.error("ระบบ API ขัดข้อง ดึงข้อมูลสำรองในเครื่อง:", error);
+                // หากอินเทอร์เน็ตหลุดหรือดึงข้อมูลไม่ได้ ระบบจะใช้ฐานข้อมูลสำรองเวอร์ชันนี้แทนเพื่อไม่ให้หน้าเว็บบั๊ก
+                historyData.lao = [
+                    { date: "21 พ.ค. 26", main: "8769", top: "769", bottom: "87" },
+                    { date: "18 พ.ค. 26", main: "9572", top: "572", bottom: "95" },
+                    { date: "15 พ.ค. 26", main: "3417", top: "417", bottom: "34" },
+                    { date: "13 พ.ค. 26", main: "7804", top: "804", bottom: "78" }
+                ];
+                historyData.thai = [
+                    { date: "16 พ.ค. 26", main: "985452", top: "452", bottom: "95" },
+                    { date: "2 พ.ค. 26",  main: "284729", top: "729", bottom: "38" },
+                    { date: "16 เม.ย. 26", main: "543118", top: "118", bottom: "21" }
+                ];
+                renderTable();
+                checkAllButtonsLimit();
+            }
+        }
+
+        // สูตรคำนวณคณิตศาสตร์ อิงตามผลงวดล่าสุดในฐานข้อมูล API
         function calculateExpertNumber(mode, position) {
+            if (!historyData[mode] || historyData[mode].length === 0) return 0;
             const latest = historyData[mode][0];
             let coreValue = 0;
+            
             if (mode === 'lao') {
-                const topUnit = parseInt(latest.top.slice(-1)) || 7;
-                const bottomTen = parseInt(latest.bottom.charAt(0)) || 2;
+                const topUnit = parseInt(latest.top.slice(-1)) || 0;
+                const bottomTen = parseInt(latest.bottom.charAt(0)) || 0;
                 coreValue = (topUnit + bottomTen) * position + 4;
             } else {
-                const topTen = parseInt(latest.top.charAt(1)) || 5;
-                const bottomUnit = parseInt(latest.bottom.slice(-1)) || 5;
+                const topTen = parseInt(latest.top.charAt(1)) || 0;
+                const bottomUnit = parseInt(latest.bottom.slice(-1)) || 0;
                 coreValue = (topTen + bottomUnit) + (position * 3) + 6;
             }
             return coreValue % 10;
         }
 
-        // ฟังก์ชันวาดวงกลมตัวเลขว่างรอการกด
         function renderEmptyCircles(count) {
             const container = document.getElementById('number-container');
             container.innerHTML = "";
@@ -137,7 +167,6 @@
             }
         }
 
-        // สลับแท็บ ไทย / ลาว
         function switchLotto(mode) {
             currentMode = mode;
             const appTitle = document.getElementById('app-title');
@@ -165,8 +194,9 @@
             checkAllButtonsLimit();
         }
 
-        // ฟังก์ชันวาดตารางสถิติย้อนหลัง
         function renderTable() {
+            if (!historyData[currentMode] || historyData[currentMode].length === 0) return;
+
             document.getElementById('table-title').innerText = currentMode === 'lao' ? "📋 ประวัติผลหวยลาวย้อนหลัง" : "📋 ประวัติผลรางวัลสลากกินแบ่งไทย";
             const head = document.getElementById('table-head');
             head.className = "bg-gray-700/50 text-xs text-gray-300 font-semibold uppercase";
@@ -187,8 +217,9 @@
             });
         }
 
-        // ตรวจสอบสถานะการล็อกใช้บริการแยกปุ่มอิสระรายวัน
         function checkAllButtonsLimit() {
+            if (!historyData[currentMode] || historyData[currentMode].length === 0) return;
+            
             const targetDigits = currentMode === 'lao' ? [2, 3, 4] : [2, 3, 6];
             let activatedState = null;
 
@@ -202,7 +233,7 @@
                     const info = JSON.parse(savedData);
                     if (info.date === getTodayString()) {
                         btn.disabled = true;
-                        activatedState = info; // ดึงผลลัพธ์ปุ่มล่าสุดมาค้างหน้าจอไว้
+                        activatedState = info; 
                     } else {
                         btn.disabled = false;
                     }
@@ -222,56 +253,3 @@
                 const colorClass = currentMode === 'lao' ? 'from-red-500 to-amber-600' : 'from-emerald-500 to-teal-600';
                 activatedState.numbers.forEach(num => {
                     container.innerHTML += `<div class="w-12 h-12 bg-gradient-to-br ${colorClass} rounded-full flex items-center justify-center text-xl font-bold text-white shadow-lg">${num}</div>`;
-                });
-            } else {
-                infoText.innerText = "💡 พร้อมคำนวณ: วันนี้คุณยังไม่ได้กดใช้สิทธิ์ของเมนูในหน้านี้";
-                infoText.className = "text-sm text-yellow-500 font-medium";
-                renderEmptyCircles(currentMode === 'lao' ? 4 : 3);
-            }
-        }
-
-        // ประมวลผลการคำนวณเลขสูตร
-        function predictLottoProcess(mode, digits) {
-            const container = document.getElementById('number-container');
-            const infoText = document.getElementById('predict-type');
-            
-            infoText.innerText = `⏳ กำลังประมวลผลสูตรเลขเด่น ${digits} ตัว...`;
-            
-            container.innerHTML = "";
-            const colorClass = mode === 'lao' ? 'from-red-500 to-amber-600' : 'from-emerald-500 to-teal-600';
-            for (let i = 0; i < digits; i++) {
-                container.innerHTML += `<div class="w-12 h-12 bg-gradient-to-br ${colorClass} rounded-full flex items-center justify-center text-xl font-bold text-white shadow-lg animate-pulse">⚡</div>`;
-            }
-
-            setTimeout(() => {
-                let calculatedNumbers = [];
-                container.innerHTML = "";
-                
-                for (let i = 1; i <= digits; i++) {
-                    const num = calculateExpertNumber(mode, i);
-                    calculatedNumbers.push(num);
-                    container.innerHTML += `<div class="w-12 h-12 bg-gradient-to-br ${colorClass} rounded-full flex items-center justify-center text-xl font-bold text-white shadow-lg">${num}</div>`;
-                }
-
-                infoText.innerText = `🔒 ล็อกสิทธิ์ปุ่มคำนวณ ${digits} ตัว สำหรับวันนี้สำเร็จ`;
-                infoText.className = "text-sm text-red-400 font-medium";
-
-                const saveState = {
-                    date: getTodayString(),
-                    digits: digits,
-                    numbers: calculatedNumbers
-                };
-                localStorage.setItem(`multi_lotto_${mode}_${digits}`, JSON.stringify(saveState));
-                
-                checkAllButtonsLimit();
-            }, 1000);
-        }
-
-        // เรียกฟังก์ชันวาดตารางตั้งแต่โหลดหน้าจอครั้งแรก
-        window.onload = function() {
-            renderTable();
-            checkAllButtonsLimit();
-        };
-    </script>
-</body>
-</html>
