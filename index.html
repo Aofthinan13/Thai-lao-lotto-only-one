@@ -1,385 +1,660 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Turbo Lotto Predictor</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8" />
 
-  <style>
-    body{
-      font-family:sans-serif;
-      background:#0f172a;
-    }
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
 
-    .glass{
-      background:rgba(255,255,255,0.05);
-      backdrop-filter:blur(12px);
-      border:1px solid rgba(255,255,255,0.08);
-    }
+<title>Turbo Lotto AI</title>
 
-    .number-ball{
-      width:70px;
-      height:70px;
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:30px;
-      font-weight:bold;
-      color:white;
-      animation:pop .4s ease;
-    }
+<meta
+  name="theme-color"
+  content="#0f172a"
+/>
 
-    @keyframes pop{
-      0%{
-        transform:scale(.5);
-        opacity:0;
-      }
-      100%{
-        transform:scale(1);
-        opacity:1;
-      }
-    }
+<link
+  rel="manifest"
+  href="manifest.json"
+/>
 
-    .loading{
-      animation:pulse 1s infinite;
-    }
-  </style>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+  font-family:sans-serif;
+  background:#020617;
+}
+
+.glass{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.ball{
+  width:70px;
+  height:70px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  font-weight:bold;
+  color:white;
+  animation:pop .4s ease;
+}
+
+@keyframes pop{
+  0%{
+    transform:scale(.5);
+    opacity:0;
+  }
+  100%{
+    transform:scale(1);
+    opacity:1;
+  }
+}
+
+.loading{
+  animation:pulse 1s infinite;
+}
+
+</style>
+
 </head>
 
 <body class="text-white min-h-screen p-4">
 
-  <div class="max-w-md mx-auto">
+<div class="max-w-md mx-auto">
 
-    <div class="glass rounded-3xl p-6 shadow-2xl">
+<div
+  class="glass rounded-3xl p-5 shadow-2xl"
+>
 
-      <h1 class="text-3xl font-bold text-center mb-2">
-        🎯 Turbo Lotto AI
-      </h1>
+<h1
+  class="text-3xl font-bold text-center mb-2"
+>
+🎯 Turbo Lotto AI
+</h1>
 
-      <p class="text-center text-gray-400 text-sm mb-6">
-        วิเคราะห์เลขเด่นจากสถิติย้อนหลัง
-      </p>
+<p
+  class="text-center text-gray-400 text-sm mb-6"
+>
+วิเคราะห์เลขเด่นจากสถิติย้อนหลัง
+</p>
 
-      <div class="flex gap-3 mb-6">
 
-        <button
-          id="btn-lao"
-          class="flex-1 bg-red-600 py-3 rounded-xl font-bold"
-        >
-          🇱🇦 หวยลาว
-        </button>
 
-        <button
-          id="btn-thai"
-          class="flex-1 bg-slate-700 py-3 rounded-xl font-bold"
-        >
-          🇹🇭 หวยไทย
-        </button>
+<div class="flex gap-3 mb-6">
 
-      </div>
+<button
+  id="thaiBtn"
+  class="flex-1 bg-emerald-600 py-3 rounded-xl font-bold"
+>
+🇹🇭 หวยไทย
+</button>
 
-      <div
-        id="numberContainer"
-        class="flex justify-center gap-3 flex-wrap min-h-[90px] mb-6"
-      ></div>
+<button
+  id="laoBtn"
+  class="flex-1 bg-slate-800 py-3 rounded-xl font-bold"
+>
+🇱🇦 หวยลาว
+</button>
 
-      <button
-        id="predictBtn"
-        class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition"
-      >
-        🚀 วิเคราะห์เลขเด่น
-      </button>
+</div>
 
-      <div class="mt-6">
 
-        <h2 class="font-bold mb-3">
-          📊 สถิติย้อนหลัง
-        </h2>
 
-        <div
-          id="historyContainer"
-          class="space-y-2"
-        ></div>
 
-      </div>
+<button
+  id="generateBtn"
+  class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 py-4 rounded-2xl font-bold text-lg shadow-lg mb-6 active:scale-95 transition"
+>
+🚀 วิเคราะห์เลขเด่น
+</button>
 
-    </div>
 
-  </div>
+
+
+<div class="space-y-5">
+
+<div>
+
+<h2 class="font-bold mb-3">
+รางวัลหลัก
+</h2>
+
+<div
+  id="mainContainer"
+  class="flex justify-center gap-2 flex-wrap"
+></div>
+
+</div>
+
+
+
+<div>
+
+<h2 class="font-bold mb-3">
+3 ตัว
+</h2>
+
+<div
+  id="threeContainer"
+  class="flex justify-center gap-2 flex-wrap"
+></div>
+
+</div>
+
+
+
+<div>
+
+<h2 class="font-bold mb-3">
+2 ตัว
+</h2>
+
+<div
+  id="twoContainer"
+  class="flex justify-center gap-2 flex-wrap"
+></div>
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="mt-8">
+
+<h2 class="font-bold mb-3">
+📊 สถิติย้อนหลัง
+</h2>
+
+<div
+  id="historyContainer"
+  class="space-y-2"
+></div>
+
+</div>
+
+</div>
+
+</div>
 
 <script>
 
+
+
+
+
+/* =========================
+   MODE
+========================= */
+
+let currentMode = 'thai'
+
+
+
+
+
+/* =========================
+   HISTORY DATA
+========================= */
+
 const historyData = {
-  lao:[
-    {top:"769",bottom:"87"},
-    {top:"572",bottom:"95"},
-    {top:"417",bottom:"34"},
-    {top:"804",bottom:"78"},
-    {top:"932",bottom:"12"},
-    {top:"118",bottom:"44"}
-  ],
 
   thai:[
-    {top:"452",bottom:"95"},
-    {top:"729",bottom:"38"},
-    {top:"118",bottom:"21"},
-    {top:"205",bottom:"64"},
-    {top:"887",bottom:"09"},
-    {top:"541",bottom:"72"}
+
+    {
+      main:'985452',
+      top:'452',
+      bottom:'95'
+    },
+
+    {
+      main:'284729',
+      top:'729',
+      bottom:'38'
+    },
+
+    {
+      main:'543118',
+      top:'118',
+      bottom:'21'
+    },
+
+    {
+      main:'074205',
+      top:'205',
+      bottom:'64'
+    },
+
+    {
+      main:'998887',
+      top:'887',
+      bottom:'09'
+    }
+
+  ],
+
+
+
+  lao:[
+
+    {
+      main:'8769',
+      top:'769',
+      bottom:'87'
+    },
+
+    {
+      main:'9572',
+      top:'572',
+      bottom:'95'
+    },
+
+    {
+      main:'3417',
+      top:'417',
+      bottom:'34'
+    },
+
+    {
+      main:'7804',
+      top:'804',
+      bottom:'78'
+    },
+
+    {
+      main:'1932',
+      top:'932',
+      bottom:'12'
+    }
+
   ]
-};
 
-let currentMode = "lao";
+}
 
-const predictBtn =
-document.getElementById("predictBtn");
 
-const numberContainer =
-document.getElementById("numberContainer");
 
-const historyContainer =
-document.getElementById("historyContainer");
 
-const laoBtn =
-document.getElementById("btn-lao");
+
+/* =========================
+   ELEMENTS
+========================= */
 
 const thaiBtn =
-document.getElementById("btn-thai");
+document.getElementById('thaiBtn')
+
+const laoBtn =
+document.getElementById('laoBtn')
+
+const generateBtn =
+document.getElementById('generateBtn')
+
+const mainContainer =
+document.getElementById('mainContainer')
+
+const threeContainer =
+document.getElementById('threeContainer')
+
+const twoContainer =
+document.getElementById('twoContainer')
+
+const historyContainer =
+document.getElementById('historyContainer')
 
 
+
+
+
+/* =========================
+   RENDER HISTORY
+========================= */
 
 function renderHistory(){
 
-  historyContainer.innerHTML = "";
+  historyContainer.innerHTML = ''
 
-  historyData[currentMode].forEach(item=>{
+  historyData[currentMode]
+    .forEach(item=>{
 
-    const row =
-    document.createElement("div");
+      const div =
+      document.createElement('div')
 
-    row.className =
-    "glass rounded-xl p-3 flex justify-between";
+      div.className =
+      'glass rounded-xl p-3 flex justify-between'
 
-    const top =
-    document.createElement("div");
+      div.innerHTML = `
 
-    top.textContent =
-    `3 ตัวบน: ${item.top}`;
+        <div>
+          ${item.main}
+        </div>
 
-    const bottom =
-    document.createElement("div");
+        <div>
+          ${item.top}-${item.bottom}
+        </div>
 
-    bottom.textContent =
-    `2 ตัวล่าง: ${item.bottom}`;
+      `
 
-    row.appendChild(top);
-    row.appendChild(bottom);
+      historyContainer.appendChild(div)
 
-    historyContainer.appendChild(row);
-
-  });
+    })
 
 }
 
 
 
-function getAllDigits(){
-
-  const rows =
-  historyData[currentMode];
-
-  const digits = [];
-
-  rows.forEach(r=>{
-
-    const combined =
-    r.top + r.bottom;
-
-    combined.split("").forEach(n=>{
-
-      const num =
-      parseInt(n);
-
-      if(!isNaN(num)){
-
-        digits.push(num);
-
-      }
-
-    });
-
-  });
-
-  return digits;
-
-}
 
 
+/* =========================
+   DIGIT FREQUENCY
+========================= */
 
-function calculateHotNumbers(){
+function getFrequency(){
 
-  const digits =
-  getAllDigits();
-
-  const freq = {};
+  const frequency = {}
 
   for(let i=0;i<=9;i++){
 
-    freq[i]=0;
+    frequency[i] = 1
 
   }
 
-  digits.forEach(n=>{
+  historyData[currentMode]
+    .forEach(item=>{
 
-    freq[n]++;
+      const combined =
+        item.main +
+        item.top +
+        item.bottom
 
-  });
+      combined
+        .split('')
+        .forEach(n=>{
 
-  const sorted =
+          const digit =
+          parseInt(n)
+
+          if(!isNaN(digit)){
+
+            frequency[digit] += 2
+
+          }
+
+        })
+
+    })
+
+  return frequency
+
+}
+
+
+
+
+
+/* =========================
+   WEIGHTED RANDOM
+========================= */
+
+function weightedRandom(freq){
+
+  const pool = []
+
   Object.entries(freq)
-  .sort((a,b)=>b[1]-a[1]);
+    .forEach(([digit,score])=>{
 
-  return sorted;
+      for(let i=0;i<score;i++){
+
+        pool.push(Number(digit))
+
+      }
+
+    })
+
+  const random =
+    crypto.getRandomValues(
+      new Uint32Array(1)
+    )[0]
+
+  return pool[
+    random % pool.length
+  ]
 
 }
 
 
 
-function cryptoRandom(){
 
-  const arr =
-  new Uint32Array(1);
 
-  crypto.getRandomValues(arr);
+/* =========================
+   GENERATE NUMBER
+========================= */
 
-  return arr[0];
+function generateNumber(length){
+
+  const freq =
+    getFrequency()
+
+  let result = ''
+
+  for(let i=0;i<length;i++){
+
+    result +=
+      weightedRandom(freq)
+
+  }
+
+  return result
 
 }
 
 
+
+
+
+/* =========================
+   RENDER BALLS
+========================= */
+
+function renderBalls(
+  container,
+  number,
+  color
+){
+
+  container.innerHTML = ''
+
+  number
+    .split('')
+    .forEach(n=>{
+
+      const div =
+      document.createElement('div')
+
+      div.className =
+      `ball ${color}`
+
+      div.textContent = n
+
+      container.appendChild(div)
+
+    })
+
+}
+
+
+
+
+
+/* =========================
+   GENERATE
+========================= */
 
 function generatePrediction(){
 
-  numberContainer.innerHTML = "";
+  const color =
+    currentMode === 'thai'
+    ? 'bg-gradient-to-br from-emerald-500 to-cyan-500'
+    : 'bg-gradient-to-br from-red-500 to-orange-500'
 
-  for(let i=0;i<4;i++){
 
-    const loading =
-    document.createElement("div");
 
-    loading.className =
-    "number-ball loading bg-slate-700";
 
-    loading.textContent = "⚡";
+  mainContainer.innerHTML =
+  `
+    <div class="ball loading bg-slate-700">⚡</div>
+  `
 
-    numberContainer.appendChild(loading);
+  threeContainer.innerHTML =
+  `
+    <div class="ball loading bg-slate-700">⚡</div>
+  `
 
-  }
+  twoContainer.innerHTML =
+  `
+    <div class="ball loading bg-slate-700">⚡</div>
+  `
+
+
+
 
   setTimeout(()=>{
 
-    numberContainer.innerHTML = "";
+    if(currentMode === 'thai'){
 
-    const hotNumbers =
-    calculateHotNumbers();
+      const lotto6 =
+        generateNumber(6)
 
-    const finalNumbers = [];
+      const lotto3 =
+        generateNumber(3)
 
-    for(let i=0;i<4;i++){
+      const lotto2 =
+        generateNumber(2)
 
-      const base =
-      parseInt(hotNumbers[i][0]);
+      renderBalls(
+        mainContainer,
+        lotto6,
+        color
+      )
 
-      const random =
-      cryptoRandom()%3;
+      renderBalls(
+        threeContainer,
+        lotto3,
+        color
+      )
 
-      const final =
-      (base + random)%10;
+      renderBalls(
+        twoContainer,
+        lotto2,
+        color
+      )
 
-      finalNumbers.push(final);
+    }else{
+
+      const lotto4 =
+        generateNumber(4)
+
+      const lotto3 =
+        generateNumber(3)
+
+      const lotto2 =
+        generateNumber(2)
+
+      renderBalls(
+        mainContainer,
+        lotto4,
+        color
+      )
+
+      renderBalls(
+        threeContainer,
+        lotto3,
+        color
+      )
+
+      renderBalls(
+        twoContainer,
+        lotto2,
+        color
+      )
 
     }
 
-    finalNumbers.forEach(num=>{
-
-      const ball =
-      document.createElement("div");
-
-      ball.className =
-      currentMode==="lao"
-      ? "number-ball bg-gradient-to-br from-red-500 to-orange-500"
-      : "number-ball bg-gradient-to-br from-emerald-500 to-cyan-500";
-
-      ball.textContent = num;
-
-      numberContainer.appendChild(ball);
-
-    });
-
-  },1500);
+  },1200)
 
 }
 
 
 
-function switchMode(mode){
 
-  currentMode = mode;
 
-  if(mode==="lao"){
+/* =========================
+   SWITCH MODE
+========================= */
 
-    laoBtn.className =
-    "flex-1 bg-red-600 py-3 rounded-xl font-bold";
+thaiBtn.onclick = ()=>{
 
-    thaiBtn.className =
-    "flex-1 bg-slate-700 py-3 rounded-xl font-bold";
+  currentMode = 'thai'
 
-  }else{
+  thaiBtn.className =
+  'flex-1 bg-emerald-600 py-3 rounded-xl font-bold'
 
-    thaiBtn.className =
-    "flex-1 bg-emerald-600 py-3 rounded-xl font-bold";
+  laoBtn.className =
+  'flex-1 bg-slate-800 py-3 rounded-xl font-bold'
 
-    laoBtn.className =
-    "flex-1 bg-slate-700 py-3 rounded-xl font-bold";
-
-  }
-
-  renderHistory();
-
-  numberContainer.innerHTML = "";
+  renderHistory()
 
 }
 
 
 
-laoBtn.addEventListener("click",()=>{
+laoBtn.onclick = ()=>{
 
-  switchMode("lao");
+  currentMode = 'lao'
 
-});
+  laoBtn.className =
+  'flex-1 bg-red-600 py-3 rounded-xl font-bold'
 
+  thaiBtn.className =
+  'flex-1 bg-slate-800 py-3 rounded-xl font-bold'
 
+  renderHistory()
 
-thaiBtn.addEventListener("click",()=>{
-
-  switchMode("thai");
-
-});
-
-
-
-predictBtn.addEventListener("click",()=>{
-
-  generatePrediction();
-
-});
+}
 
 
 
-renderHistory();
+
+
+/* =========================
+   BUTTON
+========================= */
+
+generateBtn.onclick = ()=>{
+
+  generatePrediction()
+
+}
+
+
+
+
+
+/* =========================
+   INIT
+========================= */
+
+renderHistory()
 
 </script>
 
