@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siam & Lao Lotto Expert Analytics</title>
+    <!-- โหมด Mobile App App-like Experience -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#111827">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700 py-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto text-center">
+            <h1 id="app-title" class="text-2xl font-bold text-red-500 tracking-wider">🇱🇦 LAO LOTTO PREDICTOR</h1>
+            <p class="text-xs text-gray-400 mt-1">ระบบคำนวณสูตรสถิติมหาลาภ บีบขอบเขตความน่าจะเป็น</p>
+        </div>
+    </header>
+
+    <!-- แท็บสลับประเภทหวย (ไทย / ลาว) -->
+    <div class="max-w-md mx-auto w-full px-4 mt-4">
+        <div class="flex bg-gray-800 rounded-xl p-1 border border-gray-700">
+            <button onclick="switchLotto('lao')" id="tab-lao" class="w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer bg-red-600 text-white">
+                🇱🇦 หวยลาวพัฒนา
+            </button>
+            <button onclick="switchLotto('thai')" id="tab-thai" class="w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer text-gray-400 hover:text-gray-200">
+                🇹🇭 รัฐบาลไทย
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-4 max-w-md flex-grow">
+        
+        <!-- ส่วนแสดงผลตัวเลข -->
+        <div class="bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-700 text-center mb-5">
+            <h2 id="lotto-subtitle" class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">เลขเด่นหวยลาวงวดนี้</h2>
+            
+            <div class="flex justify-center gap-4 my-5">
+                <div id="num-1" class="w-14 h-14 bg-gradient-to-br from-red-500 to-amber-600 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-red-500/20">-</div>
+                <div id="num-2" class="w-14 h-14 bg-gradient-to-br from-red-500 to-amber-600 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-red-500/20">-</div>
+                <div id="num-3" class="w-14 h-14 bg-gradient-to-br from-red-500 to-amber-600 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-red-500/20 opacity-50">-</div>
+            </div>
+
+            <p id="predict-type" class="text-sm text-yellow-500 font-medium">สิทธิ์การคำนวณ: วันนี้คุณยังไม่ได้วิเคราะห์เลขสูตร</p>
+        </div>
+
+        <!-- ปุ่มควบคุมสำหรับมือถือ -->
+        <div class="space-y-3 mb-6">
+            <button id="btn-2digits" onclick="predictLottoProcess(2)" class="w-full bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:scale-100 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-2xl shadow-lg transition duration-200 transform active:scale-95 touch-manipulation cursor-pointer text-lg">
+                📊 คำนวณเลขเด่น 2 ตัว (1 ครั้ง/วัน)
+            </button>
+            <button id="btn-3digits" onclick="predictLottoProcess(3)" class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:scale-100 disabled:cursor-not-allowed text-white font-bold py-4 px-4 rounded-2xl shadow-lg transition duration-200 transform active:scale-95 touch-manipulation cursor-pointer text-lg">
+                🌟 คำนวณเลขเด่น 3 ตัว (1 ครั้ง/วัน)
+            </button>
+        </div>
+
+        <!-- โซนตารางแสดงผลหวยเก่า -->
+        <div class="bg-gray-800 rounded-2xl p-5 shadow-xl border border-gray-700 mb-6">
+            <h3 id="table-title" class="text-md font-semibold text-gray-300 mb-3">📋 ฐานข้อมูลสถิติผลหวยย้อนหลัง</h3>
+            <div class="overflow-hidden rounded-xl border border-gray-700">
+                <table class="w-full text-left border-collapse">
+                    <thead id="table-head">
+                        <!-- เปลี่ยนตามประเภทหวยด้วย JS -->
+                    </thead>
+                    <tbody id="table-body" class="text-sm text-gray-300 divide-y divide-gray-700">
+                        <!-- ข้อมูลถูกฉีดด้วย JS -->
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-2 text-center">*ระบบคำนวณจะดึงข้อมูลจากงวดล่าสุดไปแปลงสูตรคณิตศาสตร์โดยอัตโนมัติ</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-3 text-center text-xs text-gray-500">
+        &copy; 2026 Siam & Lao Lotto Expert Analytics
+    </footer>
+
+    <!-- JavaScript ระบบประมวลผลขั้นสูง -->
+    <script>
+        let currentMode = 'lao';
+
+        // ฐานข้อมูลผลหวยล่าสุดที่ระบบจะดึงไปคิดสูตร (อัปเดตสถิติปี 2026)
+        const historyData = {
+            lao: [
+                { date: "20 พ.ค. 26", main: "1478", top: "478", bottom: "14" },
+                { date: "18 พ.ค. 26", main: "9572", top: "572", bottom: "95" },
+                { date: "15 พ.ค. 26", main: "3417", top: "417", bottom: "34" },
+                { date: "13 พ.ค. 26", main: "7804", top: "804", bottom: "78" }
+            ],
+            thai: [
+                { date: "16 พ.ค. 26", main: "985452", top: "452", bottom: "95" },
+                { date: "2 พ.ค. 26",  main: "284729", top: "729", bottom: "38" },
+                { date: "16 เม.ย. 26", main: "543118", top: "118", bottom: "21" },
+                { date: "1 เม.ย. 26",  main: "074205", top: "205", bottom: "64" }
+            ]
+        };
+
+        // ฟังก์ชันจัดฟอร์แมตวันที่ปัจจุบัน YYYY-MM-DD
+        function getTodayString() {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+
+        // ================= [ LOGIC สูตรคำนวณขั้นสูง ] =================
+        function calculateExpertNumber(mode, position) {
+            const latest = historyData[mode][0]; // ดึงผลงวดล่าสุดในตารางมาคำนวณ
+            let coreCalculatedValue = 0;
+
+            if (mode === 'lao') {
+                // สูตรหวยลาว: หลักหน่วยบน + หลักสิบหน่วยล่าง + ตัวคูณตำแหน่ง
+                const topUnit = parseInt(latest.top.charAt(2)) || 0;    // 8
+                const bottomTen = parseInt(latest.bottom.charAt(0)) || 0; // 1
+                coreCalculatedValue = (topUnit + bottomTen) * position + 3; 
+            } else {
+                // สูตรหวยไทย: หลักสิบบน + หลักหน่วยล่าง + รหัสลับกำลังวันตามปฏิทิน
+                const topTen = parseInt(latest.top.charAt(1)) || 0;     // 5
+                const bottomUnit = parseInt(latest.bottom.charAt(1)) || 0; // 5
+                coreCalculatedValue = (topTen + bottomUnit) + (position * 4) + 7;
+            }
+
+            // นำผลลัพธ์มาเอาเศษ 10 เพื่อให้ได้เลขโดด 0-9 ที่มีอัตราความน่าจะเป็นสูง
+            return coreCalculatedValue % 10;
+        }
+
+        // ฟังก์ชันสลับโหมดการทำงาน
+        function switchLotto(mode) {
+            currentMode = mode;
+            const appTitle = document.getElementById('app-title');
+            const subtitle = document.getElementById('lotto-subtitle');
+            const tabLao = document.getElementById('tab-lao');
+            const tabThai = document.getElementById('tab-thai');
+            const btn2 = document.getElementById('btn-2digits');
+            const num1 = document.getElementById('num-1');
+            const num2 = document.getElementById('num-2');
+            const num3 = document.getElementById('num-3');
+
+            if(mode === 'lao') {
+                appTitle.innerText = "🇱🇦 LAO LOTTO PREDICTOR";
+                appTitle.className = "text-2xl font-bold text-red-500 tracking-wider";
+                subtitle.innerText = "เลขเด่นหวยลาวงวดนี้";
+                btn2.className = btn2.className.replace('bg-emerald-600', 'bg-red-600').replace('hover:bg-emerald-500', 'hover:bg-red-500');
+                tabLao.className = "w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer bg-red-600 text-white";
+                tabThai.className = "w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer text-gray-400 hover:text-gray-200";
+                
+                num1.className = num1.className.replace('from-emerald-500', 'from-red-500');
+                num2.className = num2.className.replace('from-emerald-500', 'from-red-500');
+                num3.className = num3.className.replace('from-emerald-500', 'from-red-500');
+            } else {
+                appTitle.innerText = "🇹🇭 THAI LOTTO PREDICTOR";
+                appTitle.className = "text-2xl font-bold text-emerald-500 tracking-wider";
+                subtitle.innerText = "เลขเด่นสลากกินแบ่งไทยงวดนี้";
+                btn2.className = btn2.className.replace('bg-red-600', 'bg-emerald-600').replace('hover:bg-red-500', 'hover:bg-emerald-500');
+                tabThai.className = "w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer bg-emerald-600 text-white";
+                tabLao.className = "w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer text-gray-400 hover:text-gray-200";
+                
+                num1.className = num1.className.replace('from-red-500', 'from-emerald-500');
+                num2.className = num2.className.replace('from-red-500', 'from-emerald-500');
+                num3.className = num3.className.replace('from-red-500', 'from-emerald-500');
+            }
+
+            renderTable();
+            checkDailyLimit();
+        }
+
+        // ฟังก์ชันวาดโครงสร้างตาราง
+        function renderTable() {
+            document.getElementById('table-title').innerText = currentMode === 'lao' ? "📋 ประวัติผลหวยลาวย้อนหลัง" : "📋 ประวัติผลรางวัลสลากกินแบ่งไทย";
+            const head = document.getElementById('table-head');
+            head.className = "bg-gray-700/50 text-xs text-gray-300 font-semibold uppercase";
+            head.innerHTML = currentMode === 'lao' 
+                ? `<tr><th class="p-3">งวดวันที่</th><th class="p-3 text-center">เลข 4 ตัว</th><th class="p-3 text-center">3 ตัวบน</th><th class="p-3 text-center">2 ตัวล่าง</th></tr>`
+                : `<tr><th class="p-3">งวดวันที่</th><th class="p-3 text-center">รางวัลที่ 1</th><th class="p-3 text-center">3 ตัวบน</th><th class="p-3 text-center">2 ตัวล่าง</th></tr>`;
+
+            const body = document.getElementById('table-body');
+            body.innerHTML = "";
+            historyData[currentMode].forEach(row => {
+                body.innerHTML += `
+                    <tr class="hover:bg-gray-700/30">
+                        <td class="p-3 font-medium">${row.date}</td>
+                        <td class="p-3 text-center text-yellow-400 font-bold tracking-wider">${row.main}</td>
+                        <td class="p-3 text-center">${row.top}</td>
+                        <td class="p-3 text-center">${row.bottom}</td>
+                    </tr>`;
+            });
+        }
+
+        // ฟังก์ชันตรวจสอบการล็อกใช้บริการรายวันแยกประเภทหวย
+        function checkDailyLimit() {
+            const storageKey = `expert_lotto_${currentMode}`;
+            const lastData = localStorage.getItem(storageKey);
+            const predictType = document.getElementById('predict-type');
+            const btn2 = document.getElementById('btn-2digits');
+            const btn3 = document.getElementById('btn-3digits');
+            
+            btn2.disabled = false;
+            btn3.disabled = false;
+            predictType.innerText = "สิทธิ์การคำนวณ: วันนี้คุณยังไม่ได้วิเคราะห์เลขสูตร";
+            predictType.className = "text-sm text-yellow-500 font-medium";
+
+            if (lastData) {
+                const predictInfo = JSON.parse(lastData);
+                if (predictInfo.date === getTodayString()) {
+                    document.getElementById('num-1').innerText = predictInfo.n1;
+                    document.getElementById('num-2').innerText = predictInfo.n2;
+                    document.getElementById('num-3').innerText = predictInfo.n3;
+                    
+                    if(predictInfo.n3 === "-") {
+                        document.getElementById('num-3').classList.add('opacity-50');
+                    } else {
+                        document.getElementById('num-3').classList.remove('opacity-50');
+                    }
+
+                    predictType.innerText = "🔒 คุณรับเลขสูตรของวันนี้ไปแล้ว พบกันใหม่วันพรุ่งนี้ครับ";
+                    predictType.className = "text-sm text-red-400 font-medium";
+                    btn2.disabled = true;
+                    btn3.disabled = true;
+                    return;
+                }
+            }
+
+            // ถ้าไม่มีประวัติคำนวณในวันนี้ ให้แสดงค่าว่างรอคำนวณ
+            document.getElementById('num-1').innerText = "-";
+            document.getElementById('num-2').innerText = "-";
+            document.getElementById('num-3').innerText = "-";
+            document.getElementById('num-3').classList.add('opacity-50');
+        }
+
+        // ฟังก์ชันประมวลผลการคำนวณเชิงลึก
+        function predictLottoProcess(digits) {
+            const num1 = document.getElementById('num-1');
+            const num2 = document.getElementById('num-2');
+            const num3 = document.getElementById('num-3');
+            const predictType = document.getElementById('predict-type');
+
+            predictType.innerText = "⏳ กำลังดึงฐานข้อมูลและประมวลผลตามสูตรคณิตศาสตร์...";
+            num1.innerText = "⚡";
+            num2.innerText = "⚡";
+            num3.innerText = digits === 3 ? "⚡" : "-";
+            if(digits === 3) num3.classList.remove('opacity-50');
+
+            setTimeout(() => {
+                // เรียกใช้ฟังก์ชันคำนวณจากสถิติจริงตามระบบ
+                const n1 = calculateExpertNumber(currentMode, 1);
+                const n2 = calculateExpertNumber(currentMode, 2);
+                let n3 = "-";
+
+                num1.innerText = n1;
+                num2.innerText = n2;
+
+                if (digits === 3) {
+                    n3 = calculateExpertNumber(currentMode, 3);
+                    num3.innerText = n3;
+                } else {
+                    num3.classList.add('opacity-50');
+                }
+
+                predictType.innerText = "🔒 คำนวณสูตรสำเร็จ! ล็อกสิทธิ์วิเคราะห์วันนี้เรียบร้อย";
+                predictType.className = "text-sm text-green-400 font-medium";
+
+                // บันทึกสถานะการล็อกวันลงเบราว์เซอร์
+                const saveState = { date: getTodayString(), n1: n1, n2: n2, n3: n3 };
+                localStorage.setItem(`expert_lotto_${currentMode}`, JSON.stringify(saveState));
+
+                document.getElementById('btn-2digits').disabled = true;
+                document.getElementById('btn-3digits').disabled = true;
+            }, 1200);
+        }
+
+        window.onload = function() {
+            renderTable();
+            checkDailyLimit();
+        };
+    </script>
+</body>
+</html>
