@@ -1,0 +1,1 @@
+# Thai-lao-lotto-only-one
